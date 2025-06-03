@@ -1,4 +1,5 @@
 # Проектная работа 11-го спринта
+https://github.com/ErIv31/stellar-burgers.git
 
 [Макет](<https://www.figma.com/file/vIywAvqfkOIRWGOkfOnReY/React-Fullstack_-Проектные-задачи-(3-месяца)_external_link?type=design&node-id=0-1&mode=design>)
 
