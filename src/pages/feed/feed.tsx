@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from '../../services/store';
 import {
   getOrderFeedThunk,
   orderFeedSelector
-} from 'src/services/slices/order-feed-slice';
+} from '../../services/slices/order-feed-slice';
 
 export const Feed: FC = () => {
   const dispatch = useDispatch();
@@ -30,5 +30,5 @@ export const Feed: FC = () => {
     return <Preloader />;
   }
 
-  <FeedUI orders={orders} handleGetFeeds={handleGetFeeds} />;
+  return <FeedUI orders={orders} handleGetFeeds={handleGetFeeds} />;
 };

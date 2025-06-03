@@ -20,9 +20,9 @@ import {
   ProtectedRoute
 } from '@components';
 import { useEffect } from 'react';
-import { useDispatch } from 'src/services/store';
-import { authCheck, getUserThunk } from 'src/services/slices/user-slice';
-import { getIngredientsThunk } from 'src/services/slices/ingredients-slice';
+import { useDispatch } from '../../services/store';
+import { authCheck, getUserThunk } from '../../services/slices/user-slice';
+import { getIngredientsThunk } from '../../services/slices/ingredients-slice';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 const App = () => {

@@ -3,16 +3,14 @@ import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
 import { TIngredient } from '@utils-types';
 import { useParams } from 'react-router-dom';
-import { useGetOrderData } from 'src/services/hooks/useGetOrderData';
-import { useSelector } from 'src/services/store';
-import { ingredientsSelector } from 'src/services/slices/ingredients-slice';
-import { orderFeedSelector } from 'src/services/slices/order-feed-slice';
+import { useGetOrderData } from '../../services/hooks/useGetOrderData';
+import { useSelector } from '../../services/store';
+import { ingredientsSelector } from '../../services/slices/ingredients-slice';
 
 export const OrderInfo: FC = () => {
   const { number } = useParams();
-  const orderData = useGetOrderData(Number(number));
-
   const { ingredients } = useSelector(ingredientsSelector);
+  const orderData = useGetOrderData(Number(number));
 
   /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {
