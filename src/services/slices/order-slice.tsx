@@ -1,4 +1,4 @@
-import { orderBurgerApi } from '@api';
+import { orderBurgerApi, getOrdersApi } from '@api';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { TOrder } from '@utils-types';
 
@@ -10,15 +10,24 @@ export const postOrder = createAsyncThunk(
   }
 );
 
+export const getOrderHistoryThunk = createAsyncThunk(
+  'order/getOrderHistory',
+  getOrdersApi
+);
+
 type TOrderState = {
   order: TOrder | null;
+  orderHistory: TOrder[];
   request: boolean;
+  historyLoading: boolean;
   error?: string | null;
 };
 
 const initialState: TOrderState = {
   order: null,
+  orderHistory: [],
   request: false,
+  historyLoading: false,
   error: null
 };
 
@@ -44,13 +53,34 @@ const orderSlice = createSlice({
       .addCase(postOrder.fulfilled, (state, { payload }) => {
         state.order = payload;
         state.request = false;
+      })
+      .addCase(getOrderHistoryThunk.pending, (state) => {
+        state.historyLoading = true;
+        state.error = null;
+      })
+      .addCase(getOrderHistoryThunk.rejected, (state, { error }) => {
+        state.historyLoading = false;
+        state.error = error.message;
+      })
+      .addCase(getOrderHistoryThunk.fulfilled, (state, { payload }) => {
+        state.orderHistory = payload;
+        state.historyLoading = false;
       });
   },
   selectors: {
-    orderSelector: (state) => state
+    orderSelector: (state) => ({
+      order: state.order,
+      request: state.request,
+      error: state.error
+    }),
+    orderHistorySelector: (state) => ({
+      orderHistory: state.orderHistory,
+      loading: state.historyLoading,
+      error: state.error
+    })
   }
 });
 
 export const orderReducer = orderSlice.reducer;
 export const { clearOrder } = orderSlice.actions;
-export const { orderSelector } = orderSlice.selectors;
+export const { orderSelector, orderHistorySelector } = orderSlice.selectors;

@@ -4,18 +4,18 @@ import { TOrder } from '@utils-types';
 
 export const getOrderFeedThunk = createAsyncThunk(
   'orderFeed/getOrderFeed',
-  getFeedsApi
+  async () => await getFeedsApi()
 );
 
-type TOrderFeedState = {
+interface OrderFeedState {
   orderFeed: TOrder[];
   total: number;
   totalToday: number;
   loading: boolean;
   error?: string | null;
-};
+}
 
-const initialState: TOrderFeedState = {
+const initialState: OrderFeedState = {
   orderFeed: [],
   total: 0,
   totalToday: 0,
@@ -25,7 +25,7 @@ const initialState: TOrderFeedState = {
 
 const orderFeedSlice = createSlice({
   name: 'orderFeed',
-  initialState,
+  initialState: initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
@@ -33,19 +33,26 @@ const orderFeedSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(getOrderFeedThunk.rejected, (state, { error }) => {
+      .addCase(getOrderFeedThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = error.message;
+        state.error =
+          action.error.message || 'Не удалось загрузить список заказов';
       })
-      .addCase(getOrderFeedThunk.fulfilled, (state, { payload }) => {
-        state.orderFeed = payload.orders;
-        state.total = payload.total;
-        state.totalToday = payload.totalToday;
+      .addCase(getOrderFeedThunk.fulfilled, (state, action) => {
+        state.orderFeed = action.payload.orders;
+        state.total = action.payload.total;
+        state.totalToday = action.payload.totalToday;
         state.loading = false;
       });
   },
   selectors: {
-    orderFeedSelector: (state) => state
+    orderFeedSelector: (state) => ({
+      orderFeed: state.orderFeed,
+      total: state.total,
+      totalToday: state.totalToday,
+      loading: state.loading,
+      error: state.error
+    })
   }
 });
 

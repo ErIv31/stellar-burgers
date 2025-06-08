@@ -3,8 +3,8 @@ import { LoginUI } from '@ui-pages';
 import { useDispatch, useSelector } from '../../services/store';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  getUserThunk,
-  loginUserThunk,
+  getUser,
+  loginUser,
   userSelector
 } from '../../services/slices/user-slice';
 
@@ -21,10 +21,10 @@ export const Login: FC = () => {
 
     if (!email || !password) return;
 
-    dispatch(loginUserThunk({ email, password }))
+    dispatch(loginUser({ email, password }))
       .unwrap()
       .then(() => {
-        dispatch(getUserThunk())
+        dispatch(getUser())
           .unwrap()
           .then(() => {
             const from = location.state?.from || { pathname: '/' };

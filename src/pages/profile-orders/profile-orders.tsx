@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from '../../services/store';
 import {
   getOrderHistoryThunk,
   orderHistorySelector
-} from '../../services/slices/order-history-slice';
+} from '../../services/slices/order-slice';
 
 export const ProfileOrders: FC = () => {
   const dispatch = useDispatch();

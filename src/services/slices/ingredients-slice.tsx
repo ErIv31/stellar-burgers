@@ -4,16 +4,16 @@ import { TIngredient } from '@utils-types';
 
 export const getIngredientsThunk = createAsyncThunk(
   'ingredients/getIngredients',
-  getIngredientsApi
+  async () => await getIngredientsApi()
 );
 
-type TIngredientsState = {
+interface IngredientsState {
   ingredients: TIngredient[];
   loading: boolean;
   error?: string | null;
-};
+}
 
-const initialState: TIngredientsState = {
+const initialState: IngredientsState = {
   ingredients: [],
   loading: false,
   error: null
@@ -29,17 +29,22 @@ const ingredientsSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(getIngredientsThunk.rejected, (state, { error }) => {
+      .addCase(getIngredientsThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = error.message;
+        state.error =
+          action.error.message || 'Не удалось загрузить ингредиенты';
       })
-      .addCase(getIngredientsThunk.fulfilled, (state, { payload }) => {
-        state.ingredients = payload;
+      .addCase(getIngredientsThunk.fulfilled, (state, action) => {
+        state.ingredients = action.payload;
         state.loading = false;
       });
   },
   selectors: {
-    ingredientsSelector: (state) => state
+    ingredientsSelector: (state) => ({
+      ingredients: state.ingredients,
+      loading: state.loading,
+      error: state.error
+    })
   }
 });
 

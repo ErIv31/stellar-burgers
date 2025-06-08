@@ -10,11 +10,11 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { TUser } from '@utils-types';
 import { deleteCookie, setCookie } from '../../utils/cookie';
 
-export const registerUserThunk = createAsyncThunk(
+export const registerUser = createAsyncThunk(
   'user/registerUser',
   registerUserApi
 );
-export const loginUserThunk = createAsyncThunk(
+export const loginUser = createAsyncThunk(
   'user/loginUser',
   async ({ email, password }: Omit<TRegisterData, 'name'>) => {
     const data = await loginUserApi({ email, password });
@@ -23,43 +23,42 @@ export const loginUserThunk = createAsyncThunk(
     return data.user;
   }
 );
-export const getUserThunk = createAsyncThunk('user/getUser', getUserApi);
-export const updateUserThunk = createAsyncThunk(
-  'user/updateUser',
-  updateUserApi
-);
-export const logoutUserThunk = createAsyncThunk('user/logoutUser', () => {
+export const getUser = createAsyncThunk('user/getUser', getUserApi);
+export const updateUser = createAsyncThunk('user/updateUser', updateUserApi);
+export const logoutUser = createAsyncThunk('user/logoutUser', () => {
   logoutApi().then(() => {
     deleteCookie('accessToken');
     localStorage.removeItem('refreshToken');
   });
 });
 
-type TUserState = {
+interface UserState {
   user: TUser | null;
   isAuthChecked: boolean;
   isLoading: boolean;
   error?: string | null;
-};
+}
 
-const initialState: TUserState = {
+const initialState: UserState = {
   user: null,
   isLoading: false,
   isAuthChecked: false,
   error: null
 };
 
-const commonPendingHandler = (state: TUserState) => {
+const handlePending = (state: UserState) => {
   state.isLoading = true;
   state.error = null;
 };
 
-const commonRejectedHandler = (state: TUserState, action: any) => {
+const handleRejected = (state: UserState, action: any) => {
   state.isLoading = false;
-  state.error = action.error.message;
+  state.error = action.error.message || 'Произошла ошибка';
 };
 
-const commonFulfilledHandler = (state: TUserState) => {
+const handleAuthFulfilled = (state: UserState, action: any) => {
+  state.user = action.payload;
+  state.isAuthChecked = true;
   state.isLoading = false;
 };
 
@@ -73,43 +72,49 @@ const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(registerUserThunk.pending, commonPendingHandler)
-      .addCase(registerUserThunk.rejected, commonRejectedHandler)
-      .addCase(registerUserThunk.fulfilled, commonFulfilledHandler);
-    builder
-      .addCase(loginUserThunk.pending, commonPendingHandler)
-      .addCase(loginUserThunk.rejected, commonRejectedHandler)
-      .addCase(loginUserThunk.fulfilled, commonFulfilledHandler);
-    builder
-      .addCase(getUserThunk.pending, (state) => {
+      .addCase(registerUser.pending, handlePending)
+      .addCase(registerUser.rejected, handleRejected)
+      .addCase(registerUser.fulfilled, handleAuthFulfilled)
+
+      .addCase(loginUser.pending, handlePending)
+      .addCase(loginUser.rejected, handleRejected)
+      .addCase(loginUser.fulfilled, handleAuthFulfilled)
+
+      .addCase(getUser.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(getUserThunk.rejected, (state) => {
+      .addCase(getUser.rejected, (state) => {
         state.isAuthChecked = true;
         state.isLoading = false;
       })
-      .addCase(getUserThunk.fulfilled, (state, { payload }) => {
+      .addCase(getUser.fulfilled, (state, { payload }) => {
         state.user = payload.user;
         state.isAuthChecked = true;
-        commonFulfilledHandler(state);
-      });
-    builder
-      .addCase(updateUserThunk.pending, commonPendingHandler)
-      .addCase(updateUserThunk.rejected, commonRejectedHandler)
-      .addCase(updateUserThunk.fulfilled, (state, { payload }) => {
+        state.isLoading = false;
+      })
+
+      .addCase(updateUser.pending, handlePending)
+      .addCase(updateUser.rejected, handleRejected)
+      .addCase(updateUser.fulfilled, (state, { payload }) => {
         state.user = payload.user;
-        commonFulfilledHandler(state);
-      });
-    builder
-      .addCase(logoutUserThunk.pending, commonPendingHandler)
-      .addCase(logoutUserThunk.rejected, commonRejectedHandler)
-      .addCase(logoutUserThunk.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+
+      .addCase(logoutUser.pending, handlePending)
+      .addCase(logoutUser.rejected, handleRejected)
+      .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
-        commonFulfilledHandler(state);
+        state.isAuthChecked = false;
+        state.isLoading = false;
       });
   },
   selectors: {
-    userSelector: (state) => state
+    userSelector: (state) => ({
+      user: state.user,
+      isAuthChecked: state.isAuthChecked,
+      isLoading: state.isLoading,
+      error: state.error
+    })
   }
 });
 

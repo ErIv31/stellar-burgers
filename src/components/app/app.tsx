@@ -21,7 +21,7 @@ import {
 } from '@components';
 import { useEffect } from 'react';
 import { useDispatch } from '../../services/store';
-import { authCheck, getUserThunk } from '../../services/slices/user-slice';
+import { authCheck, getUser } from '../../services/slices/user-slice';
 import { getIngredientsThunk } from '../../services/slices/ingredients-slice';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
@@ -34,7 +34,7 @@ const App = () => {
   useEffect(() => {
     const token = localStorage.getItem('refreshToken');
 
-    if (token) dispatch(getUserThunk());
+    if (token) dispatch(getUser());
     else dispatch(authCheck());
     dispatch(getIngredientsThunk());
   }, [dispatch]);

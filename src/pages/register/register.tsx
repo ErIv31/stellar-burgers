@@ -2,10 +2,7 @@ import { FC, SyntheticEvent, useState } from 'react';
 import { RegisterUI } from '@ui-pages';
 import { useDispatch, useSelector } from '../../services/store';
 import { useNavigate } from 'react-router-dom';
-import {
-  registerUserThunk,
-  userSelector
-} from '../../services/slices/user-slice';
+import { registerUser, userSelector } from '../../services/slices/user-slice';
 
 export const Register: FC = () => {
   const [userName, setUserName] = useState('');
@@ -19,7 +16,7 @@ export const Register: FC = () => {
     e.preventDefault();
 
     dispatch(
-      registerUserThunk({
+      registerUser({
         email: email,
         password: password,
         name: userName

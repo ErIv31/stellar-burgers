@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { FC, useCallback, useMemo } from 'react';
 import { TConstructorIngredient } from '@utils-types';
 import { BurgerConstructorUI } from '@ui';
 import { useNavigate } from 'react-router-dom';
@@ -15,30 +15,40 @@ import {
 import { userSelector } from '../../services/slices/user-slice';
 
 export const BurgerConstructor: FC = () => {
-  const constructorItems = useSelector(burgerConstructorSelector);
+  const { bun, ingredients } = useSelector(burgerConstructorSelector);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector(userSelector);
-  const { order: orderModalData, request: orderRequest } =
-    useSelector(orderSelector);
+  const {
+    order: orderModalData,
+    request: orderRequest,
+    error: orderError
+  } = useSelector(orderSelector);
 
-  const onOrderClick = () => {
-    if (!user) return navigate('/login');
-    if (!constructorItems.bun || orderRequest) return;
+  const onOrderClick = useCallback(async () => {
+    try {
+      if (!user) {
+        navigate('/login');
+        return;
+      }
 
-    const orderIngredients = [
-      constructorItems.bun._id,
-      ...constructorItems.ingredients.map((item) => item._id),
-      constructorItems.bun._id
-    ];
+      if (!bun || orderRequest) return;
 
-    dispatch(postOrder(orderIngredients))
-      .unwrap()
-      .then(() => dispatch(clearIngredients()))
-      .catch((err) =>
-        console.error(`Failed to complete the request: ${err.message}`)
+      const orderIngredients = [
+        bun._id,
+        ...ingredients.map((item) => item._id),
+        bun._id
+      ];
+
+      await dispatch(postOrder(orderIngredients)).unwrap();
+      dispatch(clearIngredients());
+    } catch (error) {
+      console.error(
+        'Order creation failed:',
+        error instanceof Error ? error.message : 'Unknown error'
       );
-  };
+    }
+  }, [user, bun, ingredients, orderRequest, dispatch, navigate]);
 
   const closeOrderModal = () => {
     dispatch(clearOrder());
@@ -47,19 +57,19 @@ export const BurgerConstructor: FC = () => {
 
   const price = useMemo(
     () =>
-      (constructorItems.bun ? constructorItems.bun.price * 2 : 0) +
-      constructorItems.ingredients.reduce(
-        (s: number, v: TConstructorIngredient) => s + v.price,
+      (bun ? bun.price * 2 : 0) +
+      ingredients.reduce(
+        (sum: number, item: TConstructorIngredient) => sum + item.price,
         0
       ),
-    [constructorItems]
+    [bun, ingredients]
   );
 
   return (
     <BurgerConstructorUI
       price={price}
       orderRequest={orderRequest}
-      constructorItems={constructorItems}
+      constructorItems={{ bun, ingredients }}
       orderModalData={orderModalData}
       onOrderClick={onOrderClick}
       closeOrderModal={closeOrderModal}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation, Navigate } from 'react-router';
+import { useLocation, Navigate } from 'react-router-dom';
 import { useSelector } from '../../services/store';
 import { Preloader } from '@ui';
 import { userSelector } from '../../services/slices/user-slice';
@@ -9,19 +9,24 @@ type ProtectedRouteProps = {
   children: React.ReactElement;
 };
 
-export const ProtectedRoute = ({
-  onlyUnAuth,
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  onlyUnAuth = false,
   children
-}: ProtectedRouteProps) => {
-  const { user, isAuthChecked, isLoading } = useSelector(userSelector);
+}) => {
   const location = useLocation();
+  const { user, isAuthChecked, isLoading } = useSelector(userSelector);
 
-  if (!isAuthChecked || isLoading) return <Preloader />;
+  if (!isAuthChecked || isLoading) {
+    return <Preloader />;
+  }
+
   if (!onlyUnAuth && !user)
-    return <Navigate replace to='/login' state={{ from: location }} />;
+    return <Navigate to='/login' state={{ from: location }} replace />;
+
   if (onlyUnAuth && user) {
     const from = location.state?.from || { pathname: '/' };
-    return <Navigate replace to={from} />;
+    return <Navigate to={from} replace />;
   }
+
   return children;
 };

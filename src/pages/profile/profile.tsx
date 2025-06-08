@@ -2,10 +2,7 @@ import { ProfileUI } from '@ui-pages';
 import { FC, SyntheticEvent, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from '../../services/store';
 import { Preloader } from '@ui';
-import {
-  updateUserThunk,
-  userSelector
-} from '../../services/slices/user-slice';
+import { updateUser, userSelector } from '../../services/slices/user-slice';
 
 export const Profile: FC = () => {
   const dispatch = useDispatch();
@@ -36,7 +33,7 @@ export const Profile: FC = () => {
     e.preventDefault();
 
     dispatch(
-      updateUserThunk({
+      updateUser({
         name: formValue.name,
         email: formValue.email,
         password: formValue.password
